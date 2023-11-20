@@ -75,15 +75,7 @@ class ChooseWidget(QWidget):
 
         self.selected_labels = []
         self.selected_list, _, filenames = self.w.active_learning.random_sample(20)
-        # self.w.clf.fit(selected_list, selected_labels)
-
-        for i in range(len(self.imgs)):
-            lbl = self.imgs[i]
-            filename = 'dataset/training_set/' + filenames[i]
-
-            pixmap = QPixmap(filename)  # 按指定路径找到图片
-            lbl.setPixmap(pixmap)  # 在label上显示图片
-            lbl.setScaledContents(True)  # 让图片自适应label大小
+        self.set_img(filenames)
 
         self.w.resize(1300, 980)
         screen = QDesktopWidget().screenGeometry()
@@ -93,6 +85,15 @@ class ChooseWidget(QWidget):
 
         self.ui.confirm_button.clicked.connect(self.confirm)
         self.ui.result_button.clicked.connect(self.get_result)
+
+    def set_img(self, filenames):
+        for i in range(len(self.imgs)):
+            lbl = self.imgs[i]
+            filename = 'dataset/training_set/' + filenames[i]
+
+            pixmap = QPixmap(filename)  # 按指定路径找到图片
+            lbl.setPixmap(pixmap)  # 在label上显示图片
+            lbl.setScaledContents(True)  # 让图片自适应label大小
 
     def confirm(self):
 
@@ -105,5 +106,18 @@ class ChooseWidget(QWidget):
         print(self.selected_labels)
         self.w.clf.fit(self.selected_list, self.selected_labels)
 
+        for i in range(len(self.boxes)):
+            self.boxes[i].setChecked(False)
+
+        distance_metric, benchmark = self.w.active_learning.get_distance(self.w.clf)
+        self.selected_list, _, filenames = self.w.active_learning.active_sample(20)
+        print(len(filenames))
+        self.set_img(filenames)
+
     def get_result(self):
-        None
+        top_k = 20
+        filenames = self.w.active_learning.get_result(self.w.clf, top_k)
+        self.set_img(filenames)
+
+        # self.w.active_learning.show_result(self.w.active_learning.selected, self.w.train_list)
+        # print(result)

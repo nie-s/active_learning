@@ -71,7 +71,6 @@ class ActiveLearning:
 
     def active_sample(self, n_sample):
         bench_id = 20
-
         n_selected = 0
         search_time = 0
         filenames = []
@@ -104,12 +103,14 @@ class ActiveLearning:
         self.get_distance(clf)
         self.selected = np.zeros((self.n_category, self.n_train))
         result = []
+        filenames = []
 
         for i in range(self.n_category):
             for j in range(self.n_train):
                 if self.distance_metric[i][j] < self.benchmark:
                     self.selected[i][j] = 1
                     result.append(self.labels[i])
+                    filenames.append(self.labels[i] + '/' + self.train_list[i][j])
 
         while len(result) < top_k:
             i = random.randint(0, self.n_train * self.n_category - 1)
@@ -118,8 +119,9 @@ class ActiveLearning:
             if self.selected[row][col] == 0 and self.distance_metric[row][col] <= self.benchmark:
                 self.selected[row][col] = 1
                 result.append(self.labels[row])
+                filenames.append(self.labels[row] + '/' + self.train_list[row][col])
 
-        return result
+        return filenames
 
     def show_result(self, selected, train_list):
         plt.figure()
@@ -135,5 +137,19 @@ class ActiveLearning:
                     plt.imshow(img)
                     plt.xticks([])
                     plt.yticks([])
+
+        plt.show()
+
+    def show_result_file(self, filenames):
+        plt.figure()
+        cnt = 1
+        for i in range(len(filenames)):
+            path = 'dataset/training_set/' + filenames[i]
+            plt.subplot(4, 5, cnt)
+            cnt += 1
+            img = plt.imread(path)
+            plt.imshow(img)
+            plt.xticks([])
+            plt.yticks([])
 
         plt.show()
